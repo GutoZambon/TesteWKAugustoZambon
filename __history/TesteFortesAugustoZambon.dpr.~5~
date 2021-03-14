@@ -1,0 +1,18 @@
+program TesteFortesAugustoZambon;
+
+uses
+  Vcl.Forms,
+  uPrincipal in 'uPrincipal.pas' {frmPrincipal},
+  uBasico in 'uBasico.pas' {frmBasico},
+  uTanques in 'uTanques.pas' {frmTanque},
+  udmPrincipal in 'udmPrincipal.pas' {dmPrincipal: TDataModule};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmPrincipal, frmPrincipal);
+  Application.CreateForm(TdmPrincipal, dmPrincipal);
+  Application.Run;
+end.

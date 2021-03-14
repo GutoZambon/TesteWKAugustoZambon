@@ -1,0 +1,247 @@
+inherited frmTanque: TfrmTanque
+  Caption = 'Cadastro de Tanques'
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pgcBasico: TPageControl
+    ActivePage = tbManut
+    inherited tbManut: TTabSheet
+      inherited pnlFundoManutencao: TPanel
+        object Label1: TLabel
+          Left = 31
+          Top = 24
+          Width = 40
+          Height = 13
+          Caption = 'C'#243'digo :'
+        end
+        object Label2: TLabel
+          Left = 18
+          Top = 52
+          Width = 53
+          Height = 13
+          Caption = 'Descri'#231#227'o :'
+        end
+        object Label3: TLabel
+          Left = 8
+          Top = 82
+          Width = 63
+          Height = 13
+          Caption = 'Capacidade :'
+        end
+        object Label4: TLabel
+          Left = 232
+          Top = 24
+          Width = 36
+          Height = 13
+          Caption = ' Saldo :'
+        end
+        object Label5: TLabel
+          Left = 26
+          Top = 111
+          Width = 45
+          Height = 13
+          Caption = 'Produto :'
+        end
+        object edtSEQ_TANQUE: TDBEdit
+          Left = 77
+          Top = 20
+          Width = 121
+          Height = 21
+          DataField = 'SEQ_TANQUE'
+          DataSource = dsPrincipal
+          Enabled = False
+          TabOrder = 0
+        end
+        object edtDS_TANQUE: TDBEdit
+          Left = 77
+          Top = 48
+          Width = 319
+          Height = 21
+          DataField = 'DS_TANQUE'
+          DataSource = dsPrincipal
+          TabOrder = 1
+        end
+        object edtQT_CAPACIDADE: TDBEdit
+          Left = 77
+          Top = 78
+          Width = 121
+          Height = 21
+          DataField = 'QT_CAPACIDADE'
+          DataSource = dsPrincipal
+          TabOrder = 2
+        end
+        object edtQT_SALDO: TDBEdit
+          Left = 274
+          Top = 20
+          Width = 121
+          Height = 21
+          DataField = 'QT_SALDO'
+          DataSource = dsPrincipal
+          Enabled = False
+          TabOrder = 4
+        end
+        object DBLookupComboBox1: TDBLookupComboBox
+          Left = 77
+          Top = 105
+          Width = 268
+          Height = 21
+          DataField = 'ID_PRODUTO'
+          DataSource = dsPrincipal
+          KeyField = 'SEQ_PRODUTO'
+          ListField = 'DS_PRODUTO'
+          ListSource = dsProdutos
+          TabOrder = 3
+        end
+      end
+    end
+  end
+  inherited dsPrincipal: TDataSource
+    DataSet = qryTanque
+    OnStateChange = dsPrincipalStateChange
+  end
+  object qryTanque: TFDQuery
+    Connection = dmPrincipal.cnnPrincipal
+    UpdateObject = updtTanque
+    SQL.Strings = (
+      'select distinct'
+      '    tanques.seq_tanque, '
+      '    tanques.ds_tanque, '
+      '    tanques.qt_capacidade, '
+      '    tanques.qt_saldo, '
+      '    tanques.id_produto,'
+      '    tanques.DT_ALTERACAO,'
+      '    produtos.DS_PRODUTO,'
+      '    produtos.DS_SIGLA'
+      'from TANQUES'
+      
+        'left join PRODUTOS on (produtos.SEQ_PRODUTO = tanques.ID_PRODUTO' +
+        ')')
+    Left = 24
+    Top = 176
+    object qryTanqueSEQ_TANQUE: TIntegerField
+      DisplayLabel = 'C'#243'digo'
+      FieldName = 'SEQ_TANQUE'
+      Origin = 'SEQ_TANQUE'
+      ProviderFlags = [pfInUpdate, pfInWhere, pfInKey]
+    end
+    object qryTanqueDS_TANQUE: TWideStringField
+      DisplayLabel = 'Descri'#231#227'o Tanque'
+      DisplayWidth = 30
+      FieldName = 'DS_TANQUE'
+      Origin = 'DS_TANQUE'
+      Size = 32767
+    end
+    object qryTanqueQT_CAPACIDADE: TFloatField
+      DisplayLabel = 'Capacidade'
+      FieldName = 'QT_CAPACIDADE'
+      Origin = 'QT_CAPACIDADE'
+    end
+    object qryTanqueID_PRODUTO: TIntegerField
+      DisplayLabel = 'C'#243'digo Produto'
+      FieldName = 'ID_PRODUTO'
+      Origin = 'ID_PRODUTO'
+    end
+    object qryTanqueDT_ALTERACAO: TDateField
+      DisplayLabel = 'Data Altera'#231#227'o'
+      FieldName = 'DT_ALTERACAO'
+      Origin = 'DT_ALTERACAO'
+    end
+    object qryTanqueDS_PRODUTO: TWideStringField
+      AutoGenerateValue = arDefault
+      DisplayLabel = 'Descri'#231#227'o Produto'
+      DisplayWidth = 30
+      FieldName = 'DS_PRODUTO'
+      Origin = 'DS_PRODUTO'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 32767
+    end
+    object qryTanqueDS_SIGLA: TWideStringField
+      AutoGenerateValue = arDefault
+      DisplayLabel = 'Sigla Produto'
+      DisplayWidth = 10
+      FieldName = 'DS_SIGLA'
+      Origin = 'DS_SIGLA'
+      ProviderFlags = []
+      ReadOnly = True
+      Size = 32767
+    end
+    object qryTanqueQT_SALDO: TFloatField
+      DisplayLabel = 'Saldo'
+      FieldName = 'QT_SALDO'
+      Origin = 'QT_SALDO'
+    end
+  end
+  object updtTanque: TFDUpdateSQL
+    Connection = dmPrincipal.cnnPrincipal
+    InsertSQL.Strings = (
+      'INSERT INTO TANQUES'
+      '(DS_TANQUE, QT_CAPACIDADE, ID_PRODUTO, '
+      '  DT_ALTERACAO)'
+      'VALUES (:NEW_DS_TANQUE, :NEW_QT_CAPACIDADE,  :NEW_ID_PRODUTO, '
+      '  :NEW_DT_ALTERACAO);'
+      
+        'SELECT LAST_INSERT_AUTOGEN() AS SEQ_TANQUE, DS_TANQUE, QT_CAPACI' +
+        'DADE, '
+      '  ID_PRODUTO, DT_ALTERACAO'
+      'FROM TANQUES'
+      'WHERE SEQ_TANQUE = LAST_INSERT_AUTOGEN()')
+    ModifySQL.Strings = (
+      'UPDATE TANQUES'
+      
+        'SET DS_TANQUE = :NEW_DS_TANQUE, QT_CAPACIDADE = :NEW_QT_CAPACIDA' +
+        'DE, '
+      '  ID_PRODUTO = :NEW_ID_PRODUTO, '
+      '  DT_ALTERACAO = :NEW_DT_ALTERACAO'
+      'WHERE SEQ_TANQUE = :OLD_SEQ_TANQUE;'
+      'SELECT SEQ_TANQUE, DS_TANQUE, QT_CAPACIDADE, ID_PRODUTO, '
+      '  DT_ALTERACAO'
+      'FROM TANQUES'
+      'WHERE SEQ_TANQUE = :NEW_SEQ_TANQUE')
+    DeleteSQL.Strings = (
+      'DELETE FROM TANQUES'
+      'WHERE SEQ_TANQUE = :OLD_SEQ_TANQUE')
+    FetchRowSQL.Strings = (
+      
+        'SELECT SEQ_TANQUE, DS_TANQUE, QT_CAPACIDADE, QT_SALDO, ID_PRODUT' +
+        'O, '
+      '  DT_ALTERACAO'
+      'FROM TANQUES'
+      'WHERE SEQ_TANQUE = :OLD_SEQ_TANQUE')
+    Left = 96
+    Top = 176
+  end
+  object dsProdutos: TDataSource
+    DataSet = qryProdutos
+    Left = 189
+    Top = 272
+  end
+  object qryProdutos: TFDQuery
+    Connection = dmPrincipal.cnnPrincipal
+    SQL.Strings = (
+      'select '
+      '    PRODUTOS.SEQ_PRODUTO,'
+      '    PRODUTOS.DS_PRODUTO,'
+      '    PRODUTOS.DS_SIGLA'
+      'from PRODUTOS')
+    Left = 245
+    Top = 272
+    object qryProdutosSEQ_PRODUTO: TIntegerField
+      DisplayLabel = 'C'#243'digo Produto'
+      FieldName = 'SEQ_PRODUTO'
+      Origin = 'SEQ_PRODUTO'
+      ProviderFlags = [pfInUpdate, pfInWhere, pfInKey]
+    end
+    object qryProdutosDS_PRODUTO: TWideStringField
+      DisplayLabel = 'Produto'
+      FieldName = 'DS_PRODUTO'
+      Origin = 'DS_PRODUTO'
+      Size = 32767
+    end
+    object qryProdutosDS_SIGLA: TWideStringField
+      DisplayLabel = 'Sigla'
+      FieldName = 'DS_SIGLA'
+      Origin = 'DS_SIGLA'
+      Size = 32767
+    end
+  end
+end

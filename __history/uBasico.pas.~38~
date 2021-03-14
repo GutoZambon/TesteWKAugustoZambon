@@ -1,0 +1,153 @@
+unit uBasico;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, System.Actions, Vcl.ActnList,
+  Vcl.Buttons, Vcl.ComCtrls, Vcl.ExtCtrls, Data.DB, Vcl.DockTabSet, Vcl.Tabs,
+  Vcl.Grids, Vcl.DBGrids;
+
+type
+  TfrmBasico = class(TForm)
+    pnlLateral: TPanel;
+    btnIncluir: TSpeedButton;
+    btnAlterar: TSpeedButton;
+    btnGravar: TSpeedButton;
+    btnCancelar: TSpeedButton;
+    btnexcluir: TSpeedButton;
+    ActionList1: TActionList;
+    actIncluir: TAction;
+    actAlterar: TAction;
+    actGravar: TAction;
+    actCancelar: TAction;
+    actExcluir: TAction;
+    dsPrincipal: TDataSource;
+    pgcBasico: TPageControl;
+    tbManut: TTabSheet;
+    tbFiltro: TTabSheet;
+    grdFiltro: TDBGrid;
+    pnlFundoManutencao: TPanel;
+    SpeedButton1: TSpeedButton;
+    actAtualizar: TAction;
+    procedure FormCreate(Sender: TObject);
+    procedure actIncluirExecute(Sender: TObject);
+    procedure actAlterarExecute(Sender: TObject);
+    procedure actExcluirExecute(Sender: TObject);
+    procedure actCancelarExecute(Sender: TObject);
+    procedure actAtualizarExecute(Sender: TObject);
+    procedure actGravarExecute(Sender: TObject);
+  private
+    { Private declarations }
+    /// <summary>
+    ///   Função que habilita/Desabilita os botões de ação e as abas
+    /// </summary>
+    procedure HabilitaDesabilitaBotoes(aEdicao: Boolean);
+  public
+    { Public declarations }
+
+  protected
+    { Protected declarations }
+    procedure ValidaObrigatorios; Virtual; overload;
+
+  end;
+
+var
+  frmBasico: TfrmBasico;
+
+implementation
+
+{$R *.dfm}
+
+procedure TfrmBasico.actAlterarExecute(Sender: TObject);
+begin
+  if (Not dsPrincipal.DataSet.Active) or (dsPrincipal.DataSet.RecordCount = 0)  then
+  begin
+    Application.MessageBox('Selecione um registro para editar.', 'Atenção', MB_OK);
+    Exit;
+  end;
+
+  dsPrincipal.DataSet.Edit;
+
+  HabilitaDesabilitaBotoes(True { Edição });
+end;
+
+procedure TfrmBasico.actAtualizarExecute(Sender: TObject);
+begin
+  dsPrincipal.DataSet.Close;
+  dsPrincipal.DataSet.Open;
+end;
+
+procedure TfrmBasico.actCancelarExecute(Sender: TObject);
+begin
+  dsPrincipal.DataSet.Cancel;
+
+  HabilitaDesabilitaBotoes(False { Edição });
+end;
+
+procedure TfrmBasico.actExcluirExecute(Sender: TObject);
+begin
+  if (Not dsPrincipal.DataSet.Active) or (dsPrincipal.DataSet.RecordCount = 0)  then
+  begin
+    Application.MessageBox('Selecione um registro para exluir.', 'Atenção', MB_OK);
+    Exit;
+  end;
+
+  if (Application.MessageBox('Deseja exluír esse registro?', 'Exclusão', MB_YESNO) = ID_OK) then
+  begin
+    dsPrincipal.DataSet.Delete;
+    HabilitaDesabilitaBotoes(False { Edição });
+  end;
+end;
+
+procedure TfrmBasico.actGravarExecute(Sender: TObject);
+begin
+  dsPrincipal.DataSet.Post;
+
+  HabilitaDesabilitaBotoes(False { Edicao });
+end;
+
+procedure TfrmBasico.actIncluirExecute(Sender: TObject);
+begin
+  if Not dsPrincipal.DataSet.Active then
+    dsPrincipal.DataSet.Open;
+
+  dsPrincipal.DataSet.Append;
+
+  HabilitaDesabilitaBotoes(True { Edição });
+
+end;
+
+procedure TfrmBasico.FormCreate(Sender: TObject);
+begin
+  if not Assigned(dsPrincipal.DataSet) then
+    raise Exception.Create('DataSet não vínculado');
+
+  HabilitaDesabilitaBotoes(False { Edicao });
+end;
+
+procedure TfrmBasico.HabilitaDesabilitaBotoes(aEdicao: Boolean);
+begin
+  actIncluir.Enabled := not aEdicao;
+  actAlterar.Enabled := not aEdicao;
+  actExcluir.Enabled := not aEdicao;
+  actAtualizar.Enabled := not aEdicao;
+
+  actGravar.Enabled := aEdicao;
+  actCancelar.Enabled := aEdicao;
+
+  pgcBasico.ActivePage := tbManut;
+
+  tbFiltro.Enabled := not aEdicao;
+
+  pnlFundoManutencao.Enabled := aEdicao;
+
+  if not aEdicao then
+  begin
+    actAtualizarExecute(actAtualizar);
+
+    pgcBasico.ActivePage := tbFiltro;
+  end;
+end;
+
+end.

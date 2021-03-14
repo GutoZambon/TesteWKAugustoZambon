@@ -1,0 +1,16 @@
+object DataModule1: TDataModule1
+  OldCreateOrder = False
+  Height = 341
+  Width = 511
+  object FDConnection1: TFDConnection
+    Params.Strings = (
+      
+        'Database=C:\Users\donza\OneDrive\Documents\TesteFortesAugustoZam' +
+        'bon\Banco\bd.db'
+      'DriverID=SQLite')
+    Connected = True
+    LoginPrompt = False
+    Left = 184
+    Top = 112
+  end
+end

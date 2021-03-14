@@ -1,0 +1,151 @@
+object frmBasico: TfrmBasico
+  Left = 0
+  Top = 0
+  Caption = 'frmBasico'
+  ClientHeight = 345
+  ClientWidth = 570
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object pnlLateral: TPanel
+    Left = 0
+    Top = 0
+    Width = 105
+    Height = 345
+    Align = alLeft
+    TabOrder = 0
+    object btnIncluir: TSpeedButton
+      Left = 1
+      Top = 1
+      Width = 103
+      Height = 22
+      Action = actIncluir
+      Align = alTop
+      ExplicitLeft = -4
+      ExplicitTop = -5
+    end
+    object btnAlterar: TSpeedButton
+      Left = 1
+      Top = 23
+      Width = 103
+      Height = 22
+      Action = actAlterar
+      Align = alTop
+      ExplicitLeft = 32
+      ExplicitTop = 64
+      ExplicitWidth = 23
+    end
+    object btnGravar: TSpeedButton
+      Left = 1
+      Top = 45
+      Width = 103
+      Height = 22
+      Action = actGravar
+      Align = alTop
+      ExplicitLeft = 24
+      ExplicitTop = 72
+      ExplicitWidth = 23
+    end
+    object btnCancelar: TSpeedButton
+      Left = 1
+      Top = 67
+      Width = 103
+      Height = 22
+      Action = actCancelar
+      Align = alTop
+      ExplicitLeft = 32
+      ExplicitTop = 112
+      ExplicitWidth = 23
+    end
+    object btnexcluir: TSpeedButton
+      Left = 1
+      Top = 89
+      Width = 103
+      Height = 22
+      Action = actExcluir
+      Align = alTop
+      ExplicitLeft = 16
+      ExplicitTop = 128
+      ExplicitWidth = 23
+    end
+  end
+  object pgcBasico: TPageControl
+    Left = 105
+    Top = 0
+    Width = 465
+    Height = 345
+    ActivePage = tbManut
+    Align = alClient
+    TabOrder = 1
+    object tbManut: TTabSheet
+      Caption = 'Manunten'#231#227'o'
+      ExplicitWidth = 281
+      ExplicitHeight = 165
+      object pnlFundoManutencao: TPanel
+        Left = 0
+        Top = 0
+        Width = 457
+        Height = 317
+        Align = alClient
+        TabOrder = 0
+        ExplicitLeft = 128
+        ExplicitTop = 152
+        ExplicitWidth = 185
+        ExplicitHeight = 41
+      end
+    end
+    object tbFiltro: TTabSheet
+      Caption = 'Filtro'
+      ImageIndex = 1
+      ExplicitWidth = 281
+      ExplicitHeight = 165
+      object grdFiltro: TDBGrid
+        Left = 0
+        Top = 0
+        Width = 457
+        Height = 317
+        Align = alClient
+        TabOrder = 0
+        TitleFont.Charset = DEFAULT_CHARSET
+        TitleFont.Color = clWindowText
+        TitleFont.Height = -11
+        TitleFont.Name = 'Tahoma'
+        TitleFont.Style = []
+      end
+    end
+  end
+  object ActionList1: TActionList
+    Left = 8
+    Top = 144
+    object actIncluir: TAction
+      Caption = '&Incluir'
+      OnExecute = actIncluirExecute
+    end
+    object actAlterar: TAction
+      Caption = '&Alterar'
+      OnExecute = actAlterarExecute
+    end
+    object actGravar: TAction
+      Caption = '&Gravar'
+    end
+    object actCancelar: TAction
+      Caption = '&Cancelar'
+      OnExecute = actCancelarExecute
+    end
+    object actExcluir: TAction
+      Caption = '&Excluir'
+      OnExecute = actExcluirExecute
+    end
+  end
+  object dsPrincipal: TDataSource
+    Left = 9
+    Top = 232
+  end
+end

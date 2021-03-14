@@ -1,0 +1,182 @@
+unit uAbastecimentos;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, uBasico, Data.DB, System.Actions,
+  Vcl.ActnList, Vcl.Grids, Vcl.DBGrids, Vcl.ComCtrls, Vcl.Buttons, Vcl.ExtCtrls,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
+  udmPrincipal, Vcl.Mask, Vcl.DBCtrls, Vcl.StdCtrls;
+
+type
+  TfrmAbastecimentos = class(TfrmBasico)
+    qryAbastecimento: TFDQuery;
+    qryAbastecimentoSEQ_ABASTECIMENTO: TFDAutoIncField;
+    qryAbastecimentoID_BOMBA: TIntegerField;
+    qryAbastecimentoQT_ABASTECIMENTO: TFloatField;
+    qryAbastecimentoVR_UNITARIO: TFloatField;
+    qryAbastecimentoVR_ALIQUOTA_IMPOSTO: TFloatField;
+    qryAbastecimentoDT_ABASTECIMENTO: TDateTimeField;
+    qryAbastecimentoDS_BOMBA: TWideStringField;
+    qryAbastecimentoDS_SIGLA_BOMBA: TWideStringField;
+    qryAbastecimentoID_TANQUE: TIntegerField;
+    qryAbastecimentoDS_PRODUTO: TWideStringField;
+    qryAbastecimentoDS_SIGLA_PRODUTO: TWideStringField;
+    qryAbastecimentoTOTAL: TWideStringField;
+    Label1: TLabel;
+    edtID_BOMBA: TDBLookupComboBox;
+    qryBomba: TFDQuery;
+    dsBomba: TDataSource;
+    qryBombaSEQ_BOMBA: TFDAutoIncField;
+    qryBombaDS_BOMBA: TWideStringField;
+    Label2: TLabel;
+    Label3: TLabel;
+    edtQT_ABASTECIMENTO: TDBEdit;
+    Label4: TLabel;
+    Label5: TLabel;
+    edtVR_UNITARIO: TDBEdit;
+    edtDS_PRODUTO: TDBEdit;
+    edtTOTAL: TDBEdit;
+    updtAbastecimento: TFDUpdateSQL;
+    procedure qryAbastecimentoBeforeOpen(DataSet: TDataSet);
+    procedure qryAbastecimentoID_BOMBAValidate(Sender: TField);
+    procedure qryAbastecimentoQT_ABASTECIMENTOValidate(Sender: TField);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+
+  protected
+    { Protected declarations }
+    function ValidaObrigatorios: Boolean; override;
+  end;
+
+var
+  frmAbastecimentos: TfrmAbastecimentos;
+
+implementation
+
+{$R *.dfm}
+
+procedure TfrmAbastecimentos.qryAbastecimentoBeforeOpen(DataSet: TDataSet);
+var
+  qryAux: TFDQuery;
+begin
+  inherited;
+  qryAbastecimentoDT_ABASTECIMENTO.AsDateTime := Now;
+
+  qryAux := TFDQuery;
+  try
+    qryAux.Connection := qryAbastecimento.Connection;
+
+    /// Atualização de saldo do tanque, após aprovação do MVP todo controle de
+    ///  estoque deveria ser feito por uma classe
+    qryAux.SQL.Add('update tanques set qt_saldo = qt_saldo - :qt_abastecimento where seq_tanque = :p_seq_tanque');
+    qryAux.ParamByName('p_seq_tanque').AsInteger := qryAbastecimentoID_TANQUE.AsInteger;
+    qryAux.ParamByName('qt_abastecimento').AsFloat := qryAbastecimentoQT_ABASTECIMENTO.AsFloat;
+    qryAux.ExecSQL;
+
+  finally
+    qryAux.Close;
+    FreeAndNil(qryAux);
+  end;
+
+end;
+
+procedure TfrmAbastecimentos.qryAbastecimentoID_BOMBAValidate(Sender: TField);
+var
+  qryAux: TFDQuery;
+begin
+  inherited;
+  if qryAbastecimento.State in dsEditModes then
+  begin
+    qryAux := TFDQuery.Create(nil);
+    try
+      qryAux.Connection  := qryAbastecimento.Connection;
+      qryAux.SQL.Add('SELECT');
+      qryAux.SQL.Add('    BOMBAS.ID_TANQUE,');
+      qryAux.SQL.Add('    PRODUTOS.DS_PRODUTO,');
+      qryAux.SQL.Add('    PRODUTOS.DS_SIGLA AS DS_SIGLA_PRODUTO,');
+      qryAux.SQL.Add('    PRODUTOS.VR_ALIQUOTA_IMPOSTO,');
+      qryAux.SQL.Add('    produtos.VR_UNITARIO');
+      qryAux.SQL.Add('FROM BOMBAS');
+      qryAux.SQL.Add('LEFT JOIN TANQUES ON (BOMBAS.ID_TANQUE = TANQUES.SEQ_TANQUE)');
+      qryAux.SQL.Add('LEFT JOIN PRODUTOS ON (TANQUES.ID_PRODUTO = PRODUTOS.SEQ_PRODUTO)');
+      qryAux.SQL.Add('where BOMBAS.SEQ_BOMBA = :P_SEQ_BOMBA');
+      qryAux.ParamByName('P_SEQ_BOMBA').AsInteger := qryAbastecimentoID_BOMBA.AsInteger;
+      qryAux.Open;
+
+      qryAbastecimentoID_TANQUE.AsVariant := qryAux.FieldByName('ID_TANQUE').Value;
+      qryAbastecimentoVR_ALIQUOTA_IMPOSTO.AsVariant := qryAux.FieldByName('VR_ALIQUOTA_IMPOSTO').Value;
+      qryAbastecimentoVR_UNITARIO.AsVariant := qryAux.FieldByName('VR_UNITARIO').Value;
+      qryAbastecimentoDS_PRODUTO.AsVariant := qryAux.FieldByName('DS_PRODUTO').Value;
+
+    finally
+      qryAux.Close;
+      FreeAndNil(qryAux);
+    end;
+
+  end;
+end;
+
+procedure TfrmAbastecimentos.qryAbastecimentoQT_ABASTECIMENTOValidate(
+  Sender: TField);
+begin
+  inherited;
+  if qryAbastecimento.State in dsEditModes then
+    qryAbastecimentoTOTAL.AsFloat := qryAbastecimentoVR_UNITARIO.AsFloat * qryAbastecimentoQT_ABASTECIMENTO.AsFloat;
+end;
+
+function TfrmAbastecimentos.ValidaObrigatorios: Boolean;
+var
+  qryAux: TFDQuery;
+begin
+  result := False;
+  if edtID_BOMBA.Text = '' then
+  begin
+    Application.MessageBox('A bomba é obrigatória.', 'Campos obrigatórios.', MB_OK);
+    edtID_BOMBA.SetFocus;
+    exit;
+  end;
+
+  if qryAbastecimentoQT_ABASTECIMENTO.AsFloat <= 0 then
+  begin
+    Application.MessageBox('A quantidade de litros deve ser maior que zero.', 'Quantidade de litros.', MB_OK);
+    edtQT_ABASTECIMENTO.SetFocus;
+    exit;
+  end;
+
+  qryAux := TFDQuery;
+  try
+    qryAux.Connection := qryAbastecimento.Connection;
+
+    /// Atualização de saldo do tanque, após aprovação do MVP todo controle de
+    ///  estoque deveria ser feito por uma classe
+    qryAux.SQL.Add('select');
+    qryAux.SQL.Add('    qt_saldo');
+    qryAux.SQL.Add('from tanques');
+    qryAux.SQL.Add('where');
+    qryAux.SQL.Add('    seq_tanque = :p_seq_tanque');
+    qryAux.ParamByName('p_seq_tanque').AsInteger := qryAbastecimentoID_TANQUE.AsInteger;
+    qryAux.ParamByName('qt_abastecimento').AsFloat := qryAbastecimentoQT_ABASTECIMENTO.AsFloat;
+    qryAux.Open;
+
+    if qryAbastecimentoQT_ABASTECIMENTO.AsFloat >= qryAux.FieldByName('qt_saldo').AsFloat then
+    begin
+      Application.MessageBox('A quantidade de litros informada é superior ao saldo do tanque: ' + qryAux.FieldByName('qt_saldo').AsString, 'Quantidade de litros.', MB_OK);
+      edtQT_ABASTECIMENTO.SetFocus;
+      exit;
+    end;
+
+  finally
+    qryAux.Close;
+    FreeAndNil(qryAux);
+  end;
+
+  result := True;
+end;
+
+end.

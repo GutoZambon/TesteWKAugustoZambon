@@ -1,0 +1,133 @@
+unit uTanques;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, uBasico, Data.DB, System.Actions,
+  Vcl.ActnList, Vcl.Grids, Vcl.DBGrids, Vcl.ComCtrls, Vcl.Buttons, Vcl.ExtCtrls,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
+  udmPrincipal, Vcl.DBCtrls, Vcl.StdCtrls, Vcl.Mask;
+
+type
+  TfrmTanque = class(TfrmBasico)
+    qryTanque: TFDQuery;
+    qryTanqueSEQ_TANQUE: TIntegerField;
+    qryTanqueDS_TANQUE: TWideStringField;
+    qryTanqueQT_CAPACIDADE: TFloatField;
+    qryTanqueID_PRODUTO: TIntegerField;
+    qryTanqueDT_ALTERACAO: TDateField;
+    qryTanqueDS_PRODUTO: TWideStringField;
+    qryTanqueDS_SIGLA: TWideStringField;
+    updtTanque: TFDUpdateSQL;
+    Label1: TLabel;
+    edtSEQ_TANQUE: TDBEdit;
+    Label2: TLabel;
+    edtDS_TANQUE: TDBEdit;
+    Label3: TLabel;
+    edtQT_CAPACIDADE: TDBEdit;
+    Label4: TLabel;
+    edtQT_SALDO: TDBEdit;
+    DBLookupComboBox1: TDBLookupComboBox;
+    dsProdutos: TDataSource;
+    qryProdutos: TFDQuery;
+    qryProdutosSEQ_PRODUTO: TIntegerField;
+    qryProdutosDS_PRODUTO: TWideStringField;
+    qryProdutosDS_SIGLA: TWideStringField;
+    Label5: TLabel;
+    qryTanqueQT_SALDO: TFloatField;
+    btnAdicionarSaldo: TSpeedButton;
+    actAdicionaSaldo: TAction;
+    procedure dsPrincipalStateChange(Sender: TObject);
+    procedure actAdicionaSaldoExecute(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+
+  protected
+    { Protected declarations }
+    function ValidaObrigatorios: Boolean; override;
+  end;
+
+var
+  frmTanque: TfrmTanque;
+
+implementation
+
+{$R *.dfm}
+
+procedure TfrmTanque.actAdicionaSaldoExecute(Sender: TObject);
+var
+  qtLitros: Double;
+  sQtLitros: String;
+  qryAux: TFDQuery;
+begin
+  inherited;
+  if (Not qryTanque.Active) or (qryTanque.RecordCount = 0)  then
+  begin
+    Application.MessageBox('Selecione um tanque para adicionar saldo.', 'Atenção', MB_OK);
+    Exit;
+  end;
+
+  sQtLitros := InputBox('Adicionar Saldo', 'Informe a quantidade de litros que será adicionada', '');
+
+  if sQtLitros = '' then
+    exit;
+
+  if (not TryStrToFloat(sQtLitros, qtLitros)) or (qtLitros <= 0) then
+  begin
+    Application.MessageBox('O valor informado deve ser maior que zero.', 'Atenção', MB_OK);
+    Exit;
+  end;
+
+  qryAux := TFDQuery.Create(nil);
+  try
+    qryAux.Connection := dmPrincipal.cnnPrincipal;
+
+    /// Atualização de saldo do tanque, após aprovação do MVP todo controle de
+    ///  estoque deveria ser feito por uma classe ou trigger
+    qryAux.SQL.Add('update tanques set qt_saldo = COALESCE(qt_saldo, 0) + :qt_abastecimento where seq_tanque = :p_seq_tanque');
+    qryAux.ParamByName('p_seq_tanque').AsInteger := qryTanqueSEQ_TANQUE.AsInteger;
+    qryAux.ParamByName('qt_abastecimento').AsFloat := qtLitros;
+
+    qryAux.ExecSQL;
+
+    actAtualizarExecute(nil);
+
+  finally
+    qryAux.Close;
+    FreeAndNil(qryAux);
+  end;
+end;
+
+procedure TfrmTanque.dsPrincipalStateChange(Sender: TObject);
+begin
+  inherited;
+  qryProdutos.Close;
+  qryProdutos.Open;
+end;
+
+function TfrmTanque.ValidaObrigatorios: Boolean;
+begin
+  result := False;
+  if edtDS_TANQUE.Text = '' then
+  begin
+    Application.MessageBox('A descrição é obrigatória.', 'Campos obrigatórios.', MB_OK);
+    edtDS_TANQUE.SetFocus;
+    Exit;
+  end;
+
+  if edtDS_TANQUE.Text = '' then
+  begin
+    Application.MessageBox('A descrição é obrigatória.', 'Campos obrigatórios.', MB_OK);
+    edtDS_TANQUE.SetFocus;
+    Exit;
+  end;
+
+  result := True;
+end;
+
+end.

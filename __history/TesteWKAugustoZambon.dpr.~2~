@@ -1,0 +1,21 @@
+program TesteWKAugustoZambon;
+
+uses
+  Vcl.Forms,
+  uPrincipal in 'uPrincipal.pas' {frmPrincipal},
+  uTanques in 'uTanques.pas' {frmTanque},
+  udmPrincipal in 'udmPrincipal.pas' {dmPrincipal: TDataModule},
+  uBasico in 'uBasico.pas' {frmBasico},
+  uAbastecimentos in 'uAbastecimentos.pas' {frmAbastecimentos},
+  uRelatorio in 'uRelatorio.pas' {frmRelatorio};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmPrincipal, frmPrincipal);
+  Application.CreateForm(TdmPrincipal, dmPrincipal);
+  Application.CreateForm(TfrmRelatorio, frmRelatorio);
+  Application.Run;
+end.
