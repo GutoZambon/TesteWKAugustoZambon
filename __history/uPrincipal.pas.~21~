@@ -12,16 +12,17 @@ type
     pnlFundo: TPanel;
     MainMenu1: TMainMenu;
     ActionList1: TActionList;
-    Cadastros1: TMenuItem;
-    Abastecimento1: TMenuItem;
-    Relatrio1: TMenuItem;
     Sobre1: TMenuItem;
     actSobre: TAction;
     pnlSobre: TPanel;
     btnFechar: TButton;
     mmSobre: TMemo;
+    Vendas1: TMenuItem;
+    actPedidos: TAction;
+    Pedidos1: TMenuItem;
     procedure actSobreExecute(Sender: TObject);
     procedure btnFecharClick(Sender: TObject);
+    procedure actPedidosExecute(Sender: TObject);
   private
     { Private declarations }
 
@@ -38,7 +39,20 @@ var
 
 implementation
 
+uses
+  uPedidos;
+
 {$R *.dfm}
+
+procedure TfrmPrincipal.actPedidosExecute(Sender: TObject);
+begin
+  frmPeido := TfrmPeido.Create(self);
+  try
+    frmPeido.ShowModal;
+  finally
+    FreeAndNil(frmPeido);
+  end;
+end;
 
 procedure TfrmPrincipal.actSobreExecute(Sender: TObject);
 begin

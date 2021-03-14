@@ -32,7 +32,6 @@ implementation
 procedure TdmPrincipal.DataModuleCreate(Sender: TObject);
 begin
   cnnPrincipal.Connected := True;
-
 end;
 
 end.

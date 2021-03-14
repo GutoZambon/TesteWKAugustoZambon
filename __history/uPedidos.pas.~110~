@@ -46,7 +46,6 @@ type
     qryItensDS_PRODUTO: TStringField;
     qryItensQT_PRODUTO: TBCDField;
     qryItensVR_UNITARIO: TBCDField;
-    qryItensTOTAL: TWideStringField;
     updtItens: TFDUpdateSQL;
     SpeedButton6: TSpeedButton;
     actAtualizar: TAction;
@@ -79,6 +78,7 @@ type
     edtVrUnitario: TMaskEdit;
     edtQuantidade: TMaskEdit;
     edtTotal: TMaskEdit;
+    qryItensvr_total: TLargeintField;
     procedure actAtualizarExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure actIncluirExecute(Sender: TObject);
@@ -190,16 +190,18 @@ begin
   if qrypedido.State in dsEditModes then
     qryPedido.Post;
 
+  qryPedido.Connection.Transaction.Commit;
+
   HabilitaDesabilitaAciont(False { edicao });
 end;
 
 procedure TfrmPeido.actIncluirExecute(Sender: TObject);
 begin
+  qryPedido.Connection.Transaction.StartTransaction;
+
   qryPedido.Append;
   qryPedido.post;
   qryPedido.edit;
-
-  qryPedido.Transaction.StartTransaction;
 
   HabilitaDesabilitaAciont(True { edicao });
 end;
@@ -232,11 +234,11 @@ begin
   qryItensID_PRODUTO.AsInteger := edtID_PRODUTO.KeyValue;
   qryItensVR_UNITARIO.AsFloat := StrToFloatDef(edtVrUnitario.Text, 0);
   qryItensQT_PRODUTO.AsFloat := StrToFloatDef(edtQuantidade.Text, 0);
-  qryItensTOTAL.AsFloat := StrToFloatDef(edtTotal.Text, 0);
+  qryItensVR_TOTAL.AsFloat := StrToFloatDef(edtTotal.Text, 0);
   qryItens.Post;
 
   qryPedido.Edit;
-  qryPedidoVR_TOTAL.AsFloat := qryPedidoVR_TOTAL.AsFloat + qryItensTOTAL.AsFloat;
+  qryPedidoVR_TOTAL.AsFloat := qryPedidoVR_TOTAL.AsFloat + qryItensVR_TOTAL.AsFloat;
   qryPedido.Post;
 
   edtID_PRODUTO.KeyValue := null;
@@ -262,6 +264,8 @@ begin
 
   if qryPedido.RecordCount > 0 then
   begin
+    qryPedido.Connection.Transaction.StartTransaction;
+
     qryPedido.Edit;
     edtSEQ_CLIENTE.SetFocus;
 
@@ -335,8 +339,9 @@ begin
   qryItens.Cancel;
   qryPedido.Cancel;
 
-  qryPedido.Transaction.Rollback;
+  qryPedido.Connection.Transaction.Rollback;
 
+  actAtualizarExecute(nil);
   HabilitaDesabilitaAciont(False { editando });
 end;
 
